@@ -17,20 +17,79 @@ import mazeElements.*;
  *
  */
 public class StackElement {
-	MazeEntity location;
-	ArrayList<MazeEntity> rankedLocations;
+	private MazeEntity location;
+	private ArrayList<MazeEntity> rankedLocations;
+	
+	private boolean biasNorth; //these are boolean controllers for our ranking
+	private boolean biasSouth; //algorithm. A given path choice is ranked based
+	private boolean biasWest;  //on how much closer it will move towards the end
+	private boolean biasEast;  //location.
+	
 	/**
 	 * 
 	 */
 	public StackElement(MazeEntity loc, Maze myMaze) {
 		// TODO Auto-generated constructor stub
 		this.location = loc;
-		rankedLocations = myMaze.getOpenLocationsAround(location);
+		setBiases(myMaze.getEndLoc()); //set our biases based on where the end loc is
+		rankPathChoices(myMaze);
 	}
 
+	private void setBiases(EndEntity end)
+	{
+		//initialize our biases
+		biasNorth = false;
+		biasSouth = false;
+		biasWest = false;
+		biasEast = false;
+		
+		int endX = end.getRow();
+		int endY = end.getCol();
+		
+		//set our biases to true if they match any of the conditions
+		if (location.getCol() - endY > 0)
+			biasNorth = true;
+		else if (location.getCol() - endY < 0)
+			biasSouth = true;
+		
+		if (location.getRow() - endX > 0)
+			biasWest = true;
+		else if (location.getRow() - endX < 0)
+			biasEast = true;
+	}
+	//TODO OPTOMIZE this ordering
 	private void rankPathChoices(Maze myMaze) {
-		//ranking algorithm here
 		rankedLocations = myMaze.getOpenLocationsAround(location);
+		MazeEntity placeHolder;
+		boolean doneLoop = false;
+		
+		//in-place sort
+		for (int i = 1; i < rankedLocations.size(); i++)
+		{
+			for (int j = 0; j < i && !doneLoop; j++)
+			{
+				if (stepVal(rankedLocations.get(i)) >= stepVal(rankedLocations.get(j)))
+				{
+					rankedLocations.add(j, rankedLocations.get(i));
+					rankedLocations.remove(i+1); //removes where i was before the insertion
+					doneLoop = true;
+				}
+			}
+			doneLoop = false;
+		}
+	}
+	/**
+	 * 
+	 * @param pathChoice
+	 * @return
+	 */
+	private int stepVal(MazeEntity pathChoice)
+	{
+		int choiceVal = 0;
+		
+		
+		
+		return choiceVal;
 	}
 	
 	public MazeEntity nextStep( ArrayList<MazeEntity> exhaustedLocations )
@@ -53,5 +112,7 @@ public class StackElement {
 		}
 		return nextChoice;		
 	}
+	
+	
 	
 }

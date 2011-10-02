@@ -31,6 +31,7 @@ public class StackMazePathFinder extends MazePathFinder {
 	public MazePath findPath()
 	{
 	    MazePath foundPath = new MazePath();
+	    ArrayList<MazeEntity> exhaustedLocations = new ArrayList<MazeEntity>(0);
 	    MazeEntity startLocation = myMaze.getStartLoc();
 	    MazeEntity endLocation = myMaze.getEndLoc();
 	   
