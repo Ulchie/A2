@@ -35,6 +35,11 @@ public class StackElement {
 		rankPathChoices(myMaze);
 	}
 
+	/**
+	 * 
+	 * @param end This is the end entity of the Maze. Used for setting our directional
+	 * movement biases.
+	 */
 	private void setBiases(EndEntity end)
 	{
 		//initialize our biases
@@ -60,25 +65,37 @@ public class StackElement {
 	//TODO OPTOMIZE this ordering
 	private void rankPathChoices(Maze myMaze) {
 		rankedLocations = myMaze.getOpenLocationsAround(location);
-		MazeEntity placeHolder;
-		boolean doneLoop = false;
-		
-		//in-place sort
-		for (int i = 1; i < rankedLocations.size(); i++)
-		{
-			for (int j = 0; j < i && !doneLoop; j++)
-			{
-				if (stepVal(rankedLocations.get(i)) >= stepVal(rankedLocations.get(j)))
-				{
-					rankedLocations.add(j, rankedLocations.get(i));
-					rankedLocations.remove(i+1); //removes where i was before the insertion
-					doneLoop = true;
-				}
-			}
-			doneLoop = false;
-		}
 	}
+	
 	/**
+	 * 
+	 * @param visited This is the list of elements already visited for tracking purposes
+	 * @return
+	 */
+	public MazeEntity nextStep(ArrayList<MazeEntity> visited)
+	{
+		MazeEntity choice = null;
+		boolean choiceFound = false;
+		for (int i = 0; i < rankedLocations.size() && !choiceFound; i++)
+		{
+			if (visited.contains(rankedLocations.get(0)))
+				rankedLocations.remove(0);
+			else
+			{
+				choice = rankedLocations.get(0);
+				choiceFound = true;
+				rankedLocations.remove(0);
+				visited.add(choice);
+			}
+		}
+		return choice;
+	}
+	
+	public String toString()
+	{
+		return location.toString();
+	}
+	/** NOT IMPLEMENTED YET
 	 * 
 	 * @param pathChoice
 	 * @return
@@ -86,33 +103,6 @@ public class StackElement {
 	private int stepVal(MazeEntity pathChoice)
 	{
 		int choiceVal = 0;
-		
-		
-		
 		return choiceVal;
 	}
-	
-	public MazeEntity nextStep( ArrayList<MazeEntity> exhaustedLocations )
-	{
-		MazeEntity nextChoice = null;
-		boolean choiceFound = false;
-		//grab the prioritized next choice
-		
-		while (!rankedLocations.isEmpty() && !choiceFound) //if choices left
-		{
-			//If we have already exhausted our options with the best ranked
-			//choice from this node, remove it from the ranking
-			if (exhaustedLocations.contains(rankedLocations.get(0)))
-				rankedLocations.remove(0);
-			else //make this our next step
-			{
-				nextChoice = rankedLocations.get(0);
-				choiceFound = true;
-			}
-		}
-		return nextChoice;		
-	}
-	
-	
-	
 }
