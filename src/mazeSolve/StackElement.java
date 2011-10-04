@@ -76,18 +76,24 @@ public class StackElement {
 	{
 		MazeEntity choice = null;
 		boolean choiceFound = false;
-		for (int i = 0; i < rankedLocations.size() && !choiceFound; i++)
+		
+		while(rankedLocations.size()  > 0 && !choiceFound)
 		{
-			if (visited.contains(rankedLocations.get(0)))
+			choice = rankedLocations.get(0);
+			
+			if (visited.contains(choice))
+			{
 				rankedLocations.remove(0);
+				choice = null;
+			}
 			else
 			{
-				choice = rankedLocations.get(0);
 				choiceFound = true;
-				rankedLocations.remove(0);
 				visited.add(choice);
+				rankedLocations.remove(0);
 			}
 		}
+		//System.out.println(choice);
 		return choice;
 	}
 	
@@ -95,6 +101,8 @@ public class StackElement {
 	{
 		return location.toString();
 	}
+	
+	
 	/** NOT IMPLEMENTED YET
 	 * 
 	 * @param pathChoice

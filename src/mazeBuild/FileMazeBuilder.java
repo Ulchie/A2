@@ -39,8 +39,8 @@ public class FileMazeBuilder extends MazeBuilder
 	@Override
 	public Maze build() 
 	{
-		int numRows = input.nextInt();
 		int numCols = input.nextInt();
+		int numRows = input.nextInt();
 		input.nextLine(); //remove end of line character
 		
 	    setSize(numRows, numCols);

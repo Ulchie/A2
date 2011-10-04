@@ -47,6 +47,7 @@ public class StackMazePathFinder extends MazePathFinder {
 	    	
 	    	if (nextChoice == null)
 	    	{
+	    		visited.add(foundPath.get(foundPath.size() - 1));
 	    		foundPath.removeLast();
 	    		stackPath.remove(stackPath.size() - 1);
 	    	}
