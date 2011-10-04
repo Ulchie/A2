@@ -40,7 +40,7 @@ public class StackMazePathFinder extends MazePathFinder {
 	    stackPath.add(new StackElement(startLocation, myMaze));
 	    foundPath.add(startLocation);
 	    visited.add(startLocation);
-
+	    stackPath.get(0).printBiases();
 	    while (!foundPath.get(foundPath.size() - 1).isEndLocation() && foundPath.size() > 0)
 	    {
 	    	nextChoice = stackPath.get(stackPath.size() - 1).nextStep(visited);

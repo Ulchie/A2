@@ -48,23 +48,49 @@ public class StackElement {
 		biasWest = false;
 		biasEast = false;
 		
-		int endX = end.getRow();
-		int endY = end.getCol();
-		
 		//set our biases to true if they match any of the conditions
-		if (location.getCol() - endY > 0)
+		if (location.getRow() > end.getRow())
 			biasNorth = true;
-		else if (location.getCol() - endY < 0)
+		else if (location.getRow() < end.getRow())
 			biasSouth = true;
 		
-		if (location.getRow() - endX > 0)
+		if (location.getCol() > end.getCol())
 			biasWest = true;
-		else if (location.getRow() - endX < 0)
+		else if (location.getRow() < end.getCol())
 			biasEast = true;
+		
 	}
+	
+	public void printBiases()
+	{
+		System.out.println("North = " + biasNorth + "  South = " + biasSouth);
+		System.out.println("West = " + biasWest + "  East = " + biasEast);
+	}
+	
 	//TODO OPTOMIZE this ordering
 	private void rankPathChoices(Maze myMaze) {
-		rankedLocations = myMaze.getOpenLocationsAround(location);
+		ArrayList<MazeEntity> temp = myMaze.getOpenLocationsAround(location);
+		rankedLocations = new ArrayList<MazeEntity>(0);
+		boolean added = false;
+		EndEntity end = myMaze.getEndLoc();
+		
+		rankedLocations.add(temp.get(0));
+		
+		for (int i = 1; i < temp.size(); i++)
+		{
+			for (int ind = 0; ind < rankedLocations.size() && !added; ind++)
+			{
+				if ( stepVal(temp.get(i), end) > stepVal(rankedLocations.get(ind), end))
+				{
+					rankedLocations.add(ind, temp.get(i));
+					added = true;
+				}
+			}
+			if (!added)
+				rankedLocations.add(temp.get(i));
+			
+			added = false;
+		}
 	}
 	
 	/**
@@ -108,9 +134,59 @@ public class StackElement {
 	 * @param pathChoice
 	 * @return
 	 */
-	private int stepVal(MazeEntity pathChoice)
+	private int stepVal(MazeEntity pathChoice, EndEntity end)
 	{
 		int choiceVal = 0;
+		boolean movesRowCloser = false;
+		boolean movesColCloser = false;
+		
+		if(pathChoice.getCol() > location.getCol() && biasEast)
+		{
+			choiceVal++;
+			movesColCloser = true;
+		}
+		else if (pathChoice.getCol() < location.getCol() && biasWest)
+		{
+			choiceVal++;
+			movesColCloser = true;
+		}
+		if (pathChoice.getRow() > location.getRow() && biasSouth)
+		{
+			choiceVal++;
+			movesRowCloser = true;
+		}	
+		else if (pathChoice.getRow() < location.getRow() && biasNorth)
+		{
+			choiceVal++;
+			movesRowCloser = true;
+		}
+		
+		if (pathChoice.getRow() == end.getRow() && movesRowCloser)
+		{
+			choiceVal += 2;
+		}
+		
+		if (pathChoice.getCol() == end.getCol() && movesColCloser)
+		{
+			choiceVal +=2;	
+		}
+		
+		if (pathChoice.getRow() > location.getRow() && biasNorth)
+			choiceVal--;
+		else if (pathChoice.getRow() < location.getRow() && biasSouth)
+			choiceVal--;
+		
+		if (pathChoice.getCol() > location.getCol() && biasWest)
+			choiceVal--;
+		else if (pathChoice.getCol() < location.getCol() && biasEast)
+			choiceVal--;
+		
+		if (movesRowCloser && movesColCloser)
+			choiceVal += 10;
+		
+		if( pathChoice.isEndLocation())
+			choiceVal += 50;
+		
 		return choiceVal;
 	}
 }
