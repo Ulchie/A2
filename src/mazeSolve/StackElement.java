@@ -56,7 +56,7 @@ public class StackElement {
 		
 		if (location.getCol() > end.getCol())
 			biasWest = true;
-		else if (location.getRow() < end.getCol())
+		else if (location.getCol() < end.getCol())
 			biasEast = true;
 		
 	}
