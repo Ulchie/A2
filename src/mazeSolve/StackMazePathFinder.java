@@ -57,27 +57,69 @@ public class StackMazePathFinder extends MazePathFinder {
 	    		stackPath.add(new StackElement(nextChoice, myMaze));
 	    	}
 	    }
-	    /*
-	    //Below is demo code that shows step for getting open locations
-	    //around the start location followed by adding the start to the found path plus one
-	    // step. Replace this code with your stack maze solver
 	    
-	    ArrayList<MazeEntity> openPaths = myMaze.getOpenLocationsAround(startLocation);
-	    MazeEntity step = openPaths.get(0);
-	    
-	    foundPath.add(startLocation);
-	    foundPath.add(step);
-	    */
-	    //Note: The path should have the following format
-	    //     index 0 = start location
-	    //     index 1 = next step after the start
-	    //       .
-	    //       .
-	    //      index n = the end location   
-	    
-	    
+	    optimizePath(foundPath);
 		return foundPath;
 	}
-
+	
+	private void optimizePath(MazePath foundPath)
+	{
+		int index = foundPath.size() - 1; //get last element in the path found
+		ArrayList<MazeEntity> currentOpenLocs;
+		int lowestIndexFound = -1;
+		
+		for (; index > 0; index--)
+		{
+			currentOpenLocs = myMaze.getOpenLocationsAround(foundPath.get(index));
+			for (int i = 0; i < foundPath.size() && lowestIndexFound == -1; i++)
+			{
+				if (currentOpenLocs.contains(foundPath.get(i)))
+					lowestIndexFound = i;
+			}
+			
+			if (lowestIndexFound != -1)
+			{
+				while (foundPath.get(lowestIndexFound + 1) != foundPath.get(index))
+					if (foundPath.get(lowestIndexFound + 1) != myMaze.getEndLoc())
+					{
+						foundPath.remove(foundPath.get(lowestIndexFound + 1));
+						index--;
+					}
+				lowestIndexFound = -1;
+			}
+		}		
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	 

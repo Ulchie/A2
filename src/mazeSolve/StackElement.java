@@ -67,7 +67,7 @@ public class StackElement {
 		System.out.println("West = " + biasWest + "  East = " + biasEast);
 	}
 	
-	//TODO OPTOMIZE this ordering
+	
 	private void rankPathChoices(Maze myMaze) {
 		ArrayList<MazeEntity> temp = myMaze.getOpenLocationsAround(location);
 		rankedLocations = new ArrayList<MazeEntity>(0);

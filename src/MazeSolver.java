@@ -30,7 +30,6 @@ public class MazeSolver
 	
 	  StackMazePathFinder stackPathFind = null;  
 	  
-	  
 	 if(args.length >= 1)
 	 {
 	   //get start up maze type
