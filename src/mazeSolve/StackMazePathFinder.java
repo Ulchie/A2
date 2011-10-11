@@ -33,32 +33,37 @@ public class StackMazePathFinder extends MazePathFinder {
 		MazePath foundPath = new MazePath();
 		ArrayList<MazeEntity> visited = new ArrayList<MazeEntity>(0);
 	    MazeEntity startLocation = myMaze.getStartLoc();
-	    MazeEntity endLocation = myMaze.getEndLoc();
 	    MazeEntity nextChoice = null;
 	    Stack<StackElement> stackPath = new Stack<StackElement>();
-	     
+	    Stack<MazeEntity> flipStack = new Stack<MazeEntity>();
+	    StackElement workingItem;
+	    
 	    stackPath.add(new StackElement(startLocation, myMaze));
-	    foundPath.add(startLocation);
 	    visited.add(startLocation);
 
-	    while (foundPath.size() > 0 && !foundPath.get(foundPath.size() - 1).isEndLocation())
+	    while (stackPath.size() > 0 &&  !stackPath.lastElement().returnLocation().isEndLocation())
 	    {
-	    	nextChoice = stackPath.get(stackPath.size() - 1).nextStep(visited);
+	    	nextChoice = stackPath.lastElement().nextStep(visited);
 	    	
 	    	if (nextChoice == null)
 	    	{
-	    		visited.add(foundPath.get(foundPath.size() - 1));
-	    		foundPath.removeLast();
-	    		stackPath.remove(stackPath.size() - 1);
+	    		workingItem = stackPath.pop();
+	    		visited.add(workingItem.returnLocation());
 	    	}
 	    	else
-	    	{
-	    		foundPath.add(nextChoice);
 	    		stackPath.add(new StackElement(nextChoice, myMaze));
-	    	}
 	    }
 	    
-	    optimizePath(foundPath);
+	    //System.out.println(stackPath); //testing output
+	    
+	    //reverse the stack, and then pop it onto the foundPath in correct order
+	    while (stackPath.size() != 0)
+	    	flipStack.push(stackPath.pop().returnLocation()); //simultaneously reverse and pare down to only dealing with MazeEntity's
+	    																
+	    while (flipStack.size() != 0)
+	    	foundPath.add(flipStack.pop());
+	    
+	    optimizePath(foundPath); //remove elements from path that are redundant
 		return foundPath;
 	}
 	
@@ -71,29 +76,27 @@ public class StackMazePathFinder extends MazePathFinder {
 	 */
 	private void optimizePath(MazePath foundPath)
 	{
-		int index = foundPath.size() - 1; //get last element in the path found
 		ArrayList<MazeEntity> currentOpenLocs; //will store the open locations for each element evaluated
 		int lowestIndexFound = -1; //will hold the index of the lowest element found within the open locs
 								   //that is also a part of the path.
+		int index = foundPath.size() - 1; //get last index in the path found
 		
 		for (; index > 0; index--) //start at the end of the path and work our way backwards
 		{
 			currentOpenLocs = myMaze.getOpenLocationsAround(foundPath.get(index)); //get open locs around element in path
 			
 			for (int i = 0; i < foundPath.size() && lowestIndexFound == -1; i++) //start from the beginning of the path
-			{
 				if (currentOpenLocs.contains(foundPath.get(i))) //if the current open locs contains our element i, set our index
 					lowestIndexFound = i;
-			}
 			
 			if (lowestIndexFound != -1) //if we found an element...we are guaranteed to as we have a connected path but this is for safety
 			{
 				while (foundPath.get(lowestIndexFound + 1) != foundPath.get(index)) //remove every element in between lowest index and current index
-					{
-						foundPath.remove(foundPath.get(lowestIndexFound + 1));
-						index--; //we need to adjust this as removing an element results in also moving index as we work from end of list
-					}
-				lowestIndexFound = -1; //reset our index to ensure proper setting every time
+				{
+					foundPath.remove(foundPath.get(lowestIndexFound + 1));
+					index--; //we need to adjust this as removing an element results in also moving index as we work from end of list
+				}
+				lowestIndexFound = -1; //reset our lowestIndexFound to ensure proper setting every time
 			}
 		}		
 	}

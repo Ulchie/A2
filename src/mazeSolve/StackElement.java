@@ -61,22 +61,29 @@ public class StackElement {
 		
 	}
 	
+	/*
+	 * Test method to print out biases to ensure they are being set properly
+	 
 	public void printBiases()
 	{
 		System.out.println("North = " + biasNorth + "  South = " + biasSouth);
 		System.out.println("West = " + biasWest + "  East = " + biasEast);
 	}
+	*/
 	
-	
+	/**
+	 * 
+	 * @param myMaze
+	 */
 	private void rankPathChoices(Maze myMaze) {
 		ArrayList<MazeEntity> temp = myMaze.getOpenLocationsAround(location);
 		rankedLocations = new ArrayList<MazeEntity>(0);
 		boolean added = false;
 		EndEntity end = myMaze.getEndLoc();
 		
-		rankedLocations.add(temp.get(0));
+		//rankedLocations.add(temp.get(0));
 		
-		for (int i = 1; i < temp.size(); i++)
+		for (int i = 0; i < temp.size(); i++)
 		{
 			for (int ind = 0; ind < rankedLocations.size() && !added; ind++)
 			{
@@ -94,97 +101,126 @@ public class StackElement {
 	}
 	
 	/**
-	 * 
+	 * Returns the next step to be taken, or null if none available.
+	 *  
 	 * @param visited This is the list of elements already visited for tracking purposes
-	 * @return
+	 * @return Returns the MazeEntity of the next step to be taken, or null if none avail.
 	 */
 	public MazeEntity nextStep(ArrayList<MazeEntity> visited)
 	{
 		MazeEntity choice = null;
 		boolean choiceFound = false;
 		
-		while(rankedLocations.size()  > 0 && !choiceFound)
+		while(rankedLocations.size() > 0 && !choiceFound) //while we don't have a choice selected
 		{
-			choice = rankedLocations.get(0);
+			choice = rankedLocations.get(0); //select first element as it is pre-ranked
 			
-			if (visited.contains(choice))
+			if (visited.contains(choice)) //if already visited, remove from list and set choice to null
 			{
-				rankedLocations.remove(0);
-				choice = null;
+				rankedLocations.remove(0); //remove selection from ranked list so we don't revisit anything
+				choice = null; //set choice to null to ensure we don't return invalid choice
 			}
-			else
+			else //else we have an element to return
 			{
-				choiceFound = true;
-				visited.add(choice);
-				rankedLocations.remove(0);
+				choiceFound = true; //end the loop
+				visited.add(choice); //add to our visited 
+				rankedLocations.remove(0); //remove from our ranked to ensure we don't reevaluate in the future
 			}
 		}
-		//System.out.println(choice);
+
+		//System.out.println(choice);//testing printout
 		return choice;
 	}
 	
+	public MazeEntity returnLocation()
+	{
+		return this.location;
+	}
+	
+	/**
+	 * Defines the toString for this class. Only want to print out the locations toString.
+	 * Used for testing purposes
+	 */
 	public String toString()
 	{
 		return location.toString();
 	}
 	
 	
-	/** NOT IMPLEMENTED YET
+	/**
+	 * Returns a value representing the weighting of a given pathChoice.
+	 * The more positive, the better. 
 	 * 
-	 * @param pathChoice
-	 * @return
+	 * @param pathChoice This is the potential path choice we are looking at taking
+	 * @return Returns the weighting of our choice. The higher, the better.
 	 */
-	private int stepVal(MazeEntity pathChoice, EndEntity end)
+	private int stepVal(MazeEntity pathChoice, MazeEntity end)
 	{
 		int choiceVal = 0;
-		boolean movesRowCloser = false;
-		boolean movesColCloser = false;
+		boolean movesRowCloser = false; //used for determining some weights below
+		boolean movesColCloser = false; //used for determining some weights below
 		
-		if(pathChoice.getCol() > location.getCol() && biasEast)
-		{
-			choiceVal++;
-			movesColCloser = true;
+		if(pathChoice.getCol() > location.getCol() && biasEast) //if we are moving east, and the bias is east
+		{														//slightly encourage
+			choiceVal++; 
+			movesColCloser = true; //used for later evaluation
 		}
-		else if (pathChoice.getCol() < location.getCol() && biasWest)
-		{
+		else if (pathChoice.getCol() < location.getCol() && biasWest) //if we are moving west and bias is west
+		{															  //slightly encourage
 			choiceVal++;
-			movesColCloser = true;
+			movesColCloser = true; //used for later evaluation
 		}
-		if (pathChoice.getRow() > location.getRow() && biasSouth)
-		{
+		
+		if (pathChoice.getRow() > location.getRow() && biasSouth) //if the choice moves south and bias is south
+		{														  //slightly encourage
 			choiceVal++;
-			movesRowCloser = true;
+			movesRowCloser = true; //used for later evaluation
 		}	
-		else if (pathChoice.getRow() < location.getRow() && biasNorth)
-		{
+		else if (pathChoice.getRow() < location.getRow() && biasNorth) //if choice moves north and bias is north
+		{															   //slightly encourage
 			choiceVal++;
-			movesRowCloser = true;
+			movesRowCloser = true; //used for later evaluation
 		}
 		
-		if (pathChoice.getRow() == end.getRow() && movesRowCloser)
+		if (pathChoice.getRow() == end.getRow()) //if it moves into/maintains the same row, then encourage choice
+		{
+			choiceVal += 2;
+			if (!movesColCloser) //if it moves the column further away to satisfy the row, slightly dissuade
+				choiceVal--;
+		}
+		
+		if (pathChoice.getCol() == end.getCol()) //if it moves into/maintains same column, then encourage choice
+		{
+			choiceVal +=2;	
+			if (!movesRowCloser) //if it moves the row further away to satisfy column, slightly dissuade
+				choiceVal--;
+		}
+		
+		//if the difference in columns is greater than the difference in rows, and the choice moves the col closer, encourage 
+		if (Math.abs(pathChoice.getCol() - end.getCol()) > Math.abs(pathChoice.getRow() - end.getRow()) && movesColCloser)
+		{
+			choiceVal += 2;
+		}
+		//if the difference in columns is greater than the difference in rows, and the choice moves the col closer, encourage 
+		else if (Math.abs(pathChoice.getRow() - end.getRow()) > Math.abs(pathChoice.getCol() - end.getCol()) && movesColCloser)
 		{
 			choiceVal += 2;
 		}
 		
-		if (pathChoice.getCol() == end.getCol() && movesColCloser)
-		{
-			choiceVal +=2;	
-		}
+		if (pathChoice.getRow() > location.getRow() && biasNorth) //if we move south but should be moving north
+			choiceVal--;										  //slightly dissuade
+		else if (pathChoice.getRow() < location.getRow() && biasSouth) //if we move north but should be moving south
+			choiceVal--;											   //slightly dissuade
 		
-		if (pathChoice.getRow() > location.getRow() && biasNorth)
-			choiceVal--;
-		else if (pathChoice.getRow() < location.getRow() && biasSouth)
-			choiceVal--;
+		if (pathChoice.getCol() > location.getCol() && biasWest) //if we are moving east but we should be moving west
+			choiceVal--;										 //slightly dissuade
+		else if (pathChoice.getCol() < location.getCol() && biasEast) //if we are moving west but we should be moving east
+			choiceVal--;											  //slightly dissuade
 		
-		if (pathChoice.getCol() > location.getCol() && biasWest)
-			choiceVal--;
-		else if (pathChoice.getCol() < location.getCol() && biasEast)
-			choiceVal--;
-		
-		if (movesRowCloser && movesColCloser)
+		if (movesRowCloser && movesColCloser) //if both row and column are moving closer, give huge priority
 			choiceVal += 10;
 		
-		if( pathChoice.isEndLocation())
+		if( pathChoice.isEndLocation()) //if the choice IS the end location, then just fucking go there
 			choiceVal += 50;
 		
 		return choiceVal;
