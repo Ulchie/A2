@@ -13,7 +13,13 @@ import mazeSolve.*;
  */
 
 /**
+ * All cases are assumed to work at this point. All test cases have been passed and there are no bugs
+ * that I am currently aware of. If we encounter an unsolvable Maze, the final path just ends up being
+ * empty as there was no path found.
+ * 
  * @author JKidney
+ * @author Ryan Ulch
+ * @version Final, due date October 12/11
  *
  */
 public class MazeSolver 

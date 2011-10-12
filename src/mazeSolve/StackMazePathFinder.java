@@ -10,8 +10,8 @@ import java.util.Stack;
 import mazeElements.*;
 
 /**
- * @author JKidney
- *
+ * @author Ryan Ulch
+ * @version Final, due date Wednesday, October 12/11
  */
 public class StackMazePathFinder extends MazePathFinder {
 
@@ -30,27 +30,24 @@ public class StackMazePathFinder extends MazePathFinder {
 	@Override
 	public MazePath findPath()
 	{
-		MazePath foundPath = new MazePath();
-		ArrayList<MazeEntity> visited = new ArrayList<MazeEntity>(0);
-	    MazeEntity startLocation = myMaze.getStartLoc();
-	    MazeEntity nextChoice = null;
-	    Stack<StackElement> stackPath = new Stack<StackElement>();
-	    Stack<MazeEntity> flipStack = new Stack<MazeEntity>();
-	    StackElement workingItem;
+		MazePath foundPath = new MazePath(); //will hold our final path that we return
+		ArrayList<MazeEntity> visited = new ArrayList<MazeEntity>(0); //holds a visited list to ensure we don't go to locations twice
+	    MazeEntity startLocation = myMaze.getStartLoc(); //holds the starting location of the maze
+	    MazeEntity nextChoice = null; //our choice holder for where to go next at each point in the maze
+	    Stack<StackElement> stackPath = new Stack<StackElement>(); //primary Stack we will work with using StackElement elements
+	    Stack<MazeEntity> reverseStack = new Stack<MazeEntity>(); //reverse stack used to pop elements in correct order to foundPath
 	    
-	    stackPath.add(new StackElement(startLocation, myMaze));
-	    visited.add(startLocation);
+	    stackPath.add(new StackElement(startLocation, myMaze));//initialize our stack to contain the starting location
+	    visited.add(startLocation); //add the start to the visited list as well
 
+	    //while we have a non-empty stack and the last element in the stack isn't the end location, keep looping
 	    while (stackPath.size() > 0 &&  !stackPath.lastElement().returnLocation().isEndLocation())
 	    {
-	    	nextChoice = stackPath.lastElement().nextStep(visited);
+	    	nextChoice = stackPath.lastElement().nextStep(visited); //grabs the next step from the last element in the stack
 	    	
-	    	if (nextChoice == null)
-	    	{
-	    		workingItem = stackPath.pop();
-	    		visited.add(workingItem.returnLocation());
-	    	}
-	    	else
+	    	if (nextChoice == null) //if next step is null, we know we have no steps left to take from last element, so pop it off.
+	    		stackPath.pop();
+	    	else //we have a step to take, so add it to the stack
 	    		stackPath.add(new StackElement(nextChoice, myMaze));
 	    }
 	    
@@ -58,10 +55,10 @@ public class StackMazePathFinder extends MazePathFinder {
 	    
 	    //reverse the stack, and then pop it onto the foundPath in correct order
 	    while (stackPath.size() != 0)
-	    	flipStack.push(stackPath.pop().returnLocation()); //simultaneously reverse and pare down to only dealing with MazeEntity's
+	    	reverseStack.push(stackPath.pop().returnLocation()); //simultaneously reverse and pare down to only dealing with MazeEntity's
 	    																
-	    while (flipStack.size() != 0)
-	    	foundPath.add(flipStack.pop());
+	    while (reverseStack.size() != 0)
+	    	foundPath.add(reverseStack.pop());
 	    
 	    optimizePath(foundPath); //remove elements from path that are redundant
 		return foundPath;
@@ -72,7 +69,7 @@ public class StackMazePathFinder extends MazePathFinder {
 	 * steps. It does so by finding the lowest index'ed element that is a part of the 
 	 * open locations surrounding the element being currently evaluated.
 	 * 
-	 * @param foundPath
+	 * @param foundPath The path we are working on.
 	 */
 	private void optimizePath(MazePath foundPath)
 	{

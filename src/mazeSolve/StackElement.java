@@ -11,14 +11,13 @@ import mazeElements.*;
  * it. </p>
  * <p>When created, the list will be ranked. That is, preferred elements
  * will be determined and ranked earlier in the list accordingly.
- * Each time an open position is taken, we will remove it from the
- * open locations list.</p>
+ * </p>
  * @author Ryan
  *
  */
 public class StackElement {
-	private MazeEntity location;
-	private ArrayList<MazeEntity> rankedLocations;
+	private MazeEntity location; //holds our location in the maze
+	private ArrayList<MazeEntity> rankedLocations; //will hold a ranked list of open locations surrounding our location
 	
 	private boolean biasNorth; //these are boolean controllers for our ranking
 	private boolean biasSouth; //algorithm. A given path choice is ranked based
@@ -26,13 +25,13 @@ public class StackElement {
 	private boolean biasEast;  //location.
 	
 	/**
-	 * 
+	 * @param loc type MazeEntity - the location to be represented by this StackElement
+	 * @param myMaze of type Maze - the Maze that we are working with
 	 */
 	public StackElement(MazeEntity loc, Maze myMaze) {
-		// TODO Auto-generated constructor stub
 		this.location = loc;
 		setBiases(myMaze.getEndLoc()); //set our biases based on where the end loc is
-		rankPathChoices(myMaze);
+		rankPathChoices(myMaze); //rank our path choices
 	}
 
 	/**
@@ -72,31 +71,32 @@ public class StackElement {
 	*/
 	
 	/**
+	 * Takes our pathChoices and ranks them. Helper method to be used in the constructor.
 	 * 
-	 * @param myMaze
+	 * @param myMaze contains the maze we are working on.
 	 */
 	private void rankPathChoices(Maze myMaze) {
-		ArrayList<MazeEntity> temp = myMaze.getOpenLocationsAround(location);
-		rankedLocations = new ArrayList<MazeEntity>(0);
-		boolean added = false;
-		EndEntity end = myMaze.getEndLoc();
+		ArrayList<MazeEntity> temp = myMaze.getOpenLocationsAround(location); //our temporary list of open locs
+		rankedLocations = new ArrayList<MazeEntity>(0); //our ranked list...we start at 0 and grab from the temp list
+		boolean added = false; //control var for loop below
+		EndEntity end = myMaze.getEndLoc(); //end entity of the maze
 		
 		//rankedLocations.add(temp.get(0));
 		
-		for (int i = 0; i < temp.size(); i++)
+		for (int i = 0; i < temp.size(); i++) //for each element in temp
 		{
-			for (int ind = 0; ind < rankedLocations.size() && !added; ind++)
+			for (int ind = 0; ind < rankedLocations.size() && !added; ind++) //for each element in the ranked locations list
 			{
-				if ( stepVal(temp.get(i), end) > stepVal(rankedLocations.get(ind), end))
-				{
-					rankedLocations.add(ind, temp.get(i));
+				if ( stepVal(temp.get(i), end) > stepVal(rankedLocations.get(ind), end)) //check to see if the current temp element
+				{																		 //has a higher ranking...if so, insert
+					rankedLocations.add(ind, temp.get(i)); //add at the index ind, shifting everything with higher or equal indexes up one
 					added = true;
 				}
 			}
-			if (!added)
-				rankedLocations.add(temp.get(i));
+			if (!added) //if we didn't find a spot...
+				rankedLocations.add(temp.get(i)); //add to the end of the ranked locations list
 			
-			added = false;
+			added = false; //reset for next loop
 		}
 	}
 	
@@ -132,6 +132,11 @@ public class StackElement {
 		return choice;
 	}
 	
+	
+	/**
+	 * Returns the MazeEntity location of the current StackElement
+	 * @return The MazeEntity we are returning
+	 */
 	public MazeEntity returnLocation()
 	{
 		return this.location;
@@ -206,6 +211,8 @@ public class StackElement {
 		{
 			choiceVal += 2;
 		}
+			
+
 		
 		if (pathChoice.getRow() > location.getRow() && biasNorth) //if we move south but should be moving north
 			choiceVal--;										  //slightly dissuade
